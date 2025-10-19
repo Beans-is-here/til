@@ -13,7 +13,7 @@ class RecipesController < ApplicationController
       "recipeName": "料理名",
       "description": "料理の簡単な説明",
       "ingredients": [
-        { "name": "料理名", "quantity": "分量" }
+        { "name": "材料名", "quantity": "分量" }
       ],
       "instructions": [
         "手順1",
