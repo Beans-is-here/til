@@ -1,5 +1,8 @@
+require 'json'
 class RecipesController < ApplicationController
   def new
+    # newアクションでも@recipeを初期化しておくと、ビューでの条件分岐がシンプルになります
+    @recipe = nil
   end
 
   def create
@@ -24,6 +27,8 @@ class RecipesController < ApplicationController
 
     client = OpenAI::Client.new
 
+    begin
+
     response = client.chat(
       parameters: {
         model: "gpt-4o-mini",
@@ -35,5 +40,17 @@ class RecipesController < ApplicationController
 
     raw_response = response.dig("choices", 0, "message", "content")
     @recipe = JSON.parse(raw_response)
+
+    rescue OpenAI::Error => e
+      # APIエラーが発生した場合の処理
+      @error_message = "AIとの通信中にエラーが発生しました: #{e.message}"
+    rescue JSON::ParserError => e
+      # JSONのパースに失敗した場合の処理
+      @error_message = "AIからの応答を正しく解析できませんでした。もう一度お試しください。"
+    end
+
+    # createアクションの後、newテンプレートを再描画する
+    # これにより、@recipe変数がnew.html.erbで使えるようになります
+    render :new, status: :ok
   end
 end
